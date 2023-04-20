@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Show</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="fragments/navbar.html"></div>
+
+<div class="container overflow-hidden m-5">
+    <div class="row gy-5">
+        <div class="col">
+            <h2 th:text="${person.getFullname}" align="center"></h2>
+            <table class="table table-bordered table-sm table-striped">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Year of Born</th>
+                    <th>Email</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td th:text="${person.getName}" scope="col"></td>
+                    <td th:text="${person.getSurName}"></td>
+                    <td th:text="${person.getYearOfBorn}"></td>
+                    <td th:text="${person.getEmail}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${#lists.isEmpty(books)}" th:text="${@personController.getNoBooks()}"></div>
+
+            <div th:unless="${#lists.isEmpty(books)}">
+                <h3> Borrowed books </h3>
+                <table class="table table-bordered table-sm table-striped">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Booking date</th>
+                        <th>Return date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="book : ${books}">
+                        <td th:text="${book.getBookName}" scope="col"></td>
+                        <td th:text="${book.getAuthor}"></td>
+                        <td th:text="${book.bookingDate}"></td>
+                        <td th:text="${@bookServiceImpl.getDateOfReturn(book)}"></td>
+                        <td><a th:href="@{/return(id=${book.id})}" class="btn btn-info">Return</a>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer.html"></div>
+</body>
+</html>

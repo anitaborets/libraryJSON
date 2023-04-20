@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+
+<div th:replace="fragments/navbar.html"></div>
+<br/>
+<hr/>
+
+<h1 align="center">WELCOME IN OUR LIBRARY</h1>
+
+<div class="row no-gutters bg-light position-relative">
+    <div class="col-md-6 mb-md-0 p-md-4">
+        <img src="/image/library.jpg" class="w-100" alt="puzzle">
+    </div>
+    <div class="col-md-6 position-static p-4 pl-md-0">
+        <h5 class="mt-0">OPENING TIMES FOR PUBLIC VISITORS</h5>
+        <p>Sunday - Friday from 06.00 to 21.00 </p>
+        <p>LA County Library was established in 1912 under authority of the County Free Library Act. The Library is a special fund department operating under the authority of the County Board of Supervisors. Today it is one of the major libraries of our nation, and provides library service to over 3.4 million residents living in unincorporated areas and to residents of 49 of the 88 incorporated cities of Los Angeles County. The service area extends over 3,000 square miles. Supplementing the 7.5 million volume book collection,
+            the Library also offers magazines, newspapers, government publications and many specialized materials including online databases.</p>
+        <a th:href="@{/books}" class="stretched-link">OUR BOOKS</a>
+    </div>
+</div>
+
+
+<div th:replace="fragments/footer.html"></div>
+</body>
+</html>
