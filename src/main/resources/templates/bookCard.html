@@ -42,7 +42,7 @@
                     <h4>Select the client, please</h4>
                     <form th:method="POST" th:action="@{/assign}" th:object="${book}">
                         <input type="hidden" th:field="*{id}" id="id" th:value="book.getId"/>
-                        <select th:field="*{owner}" name="owner">
+                        <select th:field="*{owner}" name="owner" modelAttribute="person">
                             <option th:each="client: ${users}"
                                     th:value="${client.id}"
                                     th:text="#{${client.getFullname}}"></option>

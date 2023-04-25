@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<div th:fragment="pagination">
+  <h2 align="center">
+    <button style="btn btn-light" th:each="pageNumber:${page_numbers}" class="button-page">
+      <a th:href="@{/books(page=${pageNumber},size=5)}" th:text="${pageNumber}"
+         th:classappend="${pageNumber==current_page}"></a>
+    </button>
+  </h2>
+</div>

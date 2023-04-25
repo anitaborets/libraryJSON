@@ -4,9 +4,14 @@ import com.example.books.book.BookServiceImpl;
 import com.example.books.models.Person;
 import com.example.books.book.BookRepository;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -18,6 +23,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.example.books.utils.Constants.NO_BOOKS;
 
@@ -28,26 +35,43 @@ public class PersonController {
     @Autowired
     PersonRepository personRepository;
     @Autowired
-    BookRepository bookRepository;
+    PersonValidator personValidator;
     @Autowired
     PersonServiceImpl personService;
     @Autowired
     BookServiceImpl bookService;
 
     @GetMapping("/users")
-    public String index(Model model) {
-        List users = personService.findAll();
-        model.addAttribute("users", users);
+    @Transactional(readOnly = true)
+    public String index(Model model, @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
+                        @RequestParam(value = "page", required = false) @Min(0) Integer page,
+                        @RequestParam(value = "size", required = false, defaultValue = "5") @Min(0) @Max(100) Integer size,
+                        @RequestParam(value = "sort", required = false) boolean sortByYear) {
+
+        int totalPages = (int) Math.ceil(1.0 * personRepository.count() / size);
+        if (totalPages > 1) {
+            List<Integer> pagenumbers = IntStream.rangeClosed(1, totalPages).boxed().collect(Collectors.toList());
+            model.addAttribute("page_numbers", pagenumbers);
+        }
+
+        model.addAttribute("current_page", page);
+        if (page == null || size == null) {
+            model.addAttribute("users", personService.findAllWithPagination(0, size));
+        } else {
+            model.addAttribute("users", personService.findAllWithPagination(page - 1, size));
+        }
         return "users";
     }
 
-    @Transactional
     @PostMapping("/registration")
+    @Transactional
     public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+        personValidator.validate(person, bindingResult);
         if (bindingResult.hasErrors()) {
             return "registration";
         }
         personService.addPerson(person);
+        log.warn("person was added" + person.getId());
         return "redirect:/users";
     }
 
@@ -67,6 +91,7 @@ public class PersonController {
 
     @PostMapping("/update")
     public String update(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) {
+        personValidator.validate(person, bindingResult);
         if (bindingResult.hasErrors()) {
             return "update";
         }
@@ -86,7 +111,7 @@ public class PersonController {
                 books = person.getPersonCard();
             }
         } catch (Exception e) {
-            log.info("no books" + e.getMessage());
+            log.error("no books" + e.getMessage());
             model.addAttribute("books", books);
             model.addAttribute("person", person);
         }

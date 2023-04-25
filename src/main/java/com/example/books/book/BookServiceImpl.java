@@ -2,7 +2,14 @@ package com.example.books.book;
 
 import com.example.books.models.Book;
 import com.example.books.models.Person;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,20 +25,36 @@ import static com.example.books.utils.Constants.BOOKING_PERIOD;
 import static com.example.books.book.BookState.RESERVED;
 
 @Service
+@Slf4j
 public class BookServiceImpl implements BookService {
     @Autowired
     BookRepository bookRepository;
 
     @Override
     @Transactional(readOnly = true)
-    public List<Book> findAll() {
+    public List<Book> findAll(boolean sortByYear) {
         List books;
+
         try {
-            books = bookRepository.findAll();
+            if (sortByYear)
+                books = bookRepository.findAll();
+            else
+                books = bookRepository.findAll(Sort.by("bookName"));
         } catch (Exception e) {
             books = Collections.EMPTY_LIST;
         }
         return books;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Book> findAllWithPagination(Integer page, Integer size) {
+        if (page >= 0 && size >= 0) {
+            Pageable pageable = PageRequest.of(page, size,Sort.by("bookName"));
+            return bookRepository.findAll(pageable);
+        } else {
+            return bookRepository.findAll(PageRequest.of(1, 3,Sort.by("bookName")));
+        }
     }
 
     @Override
@@ -49,6 +72,7 @@ public class BookServiceImpl implements BookService {
 
             bookForBooking.setBookingDate(Date.valueOf(LocalDate.now()));
             bookRepository.save(bookForBooking);
+            log.warn("Book was booking, book id: " + book.getId() + ", user id:" + book.getOwner().getId());
         }
     }
 
@@ -63,6 +87,7 @@ public class BookServiceImpl implements BookService {
             returningBook.setBookingDate(null);
             returningBook.setReturnDate(null);
             returningBook.setBookState(FREE);
+            log.warn("Book was return, id: " + returningBook.getId());
         }
 
         bookRepository.save(returningBook);
@@ -71,7 +96,9 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public void addBook(Book book) {
+
         bookRepository.findByISDN(book.getISDN()).orElseGet(() -> bookRepository.save(book));
+        log.warn("book was added" + book.getBookName());
     }
 
     @Override
@@ -92,11 +119,10 @@ public class BookServiceImpl implements BookService {
             try {
                 bookRepository.save(book);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                log.error("Book" + book.getId() + "was not updated" + e.getMessage());
             }
         }
     }
-
 
     @Override
     @Transactional
@@ -108,11 +134,12 @@ public class BookServiceImpl implements BookService {
                 bookRepository.deleteById((long) id);
                 isDeleted = true;
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                log.error("Book" + id + "was not deleted" + e.getMessage());
             }
         }
         return isDeleted;
     }
+
     @Override
     public String getDateOfReturn(Book book) {
         Date returnDate = Date.valueOf(book.getBookingDate().toLocalDate().plusDays(BOOKING_PERIOD));
