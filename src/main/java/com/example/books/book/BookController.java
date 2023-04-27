@@ -20,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,14 +34,12 @@ import static com.example.books.utils.Constants.BOOK_IS_FREE;
 @Slf4j
 @Scope(WebApplicationContext.SCOPE_SESSION)
 public class BookController {
-    public int bookId = 0;
     @Autowired
     BookRepository bookRepository;
     @Autowired
     BookServiceImpl bookServiceImpl;
     @Autowired
     PersonRepository personRepository;
-
     @Autowired
     BookValidator bookValidator;
 
@@ -57,15 +56,29 @@ public class BookController {
             model.addAttribute("page_numbers", pagenumbers);
         }
 
-        model.addAttribute("current_page",page);
+        model.addAttribute("current_page", page);
         if (page == null || size == null) {
             model.addAttribute("books", bookServiceImpl.findAllWithPagination(0, size));
             //model.addAttribute("books", bookServiceImpl.findAll(sortByYear));
         } else {
-            model.addAttribute("books", bookServiceImpl.findAllWithPagination(page-1, size));
+            model.addAttribute("books", bookServiceImpl.findAllWithPagination(page - 1, size));
         }
-
         return "books";
+    }
+
+    @GetMapping("/search")
+    @Transactional(readOnly = true)
+    public String index(Model model, String query, RedirectAttributes redirAttrs) {
+        List<Book> result = bookServiceImpl.find(query);
+        if (!result.isEmpty()) {
+            model.addAttribute("result", result);
+            return "search";
+
+        } else {
+            redirAttrs.addFlashAttribute("error", "Book is not founded");
+            model.addAttribute("books", bookServiceImpl.findAllWithPagination(0, 5));
+            return "redirect:/books";
+        }
     }
 
     @GetMapping("/add")
@@ -87,9 +100,13 @@ public class BookController {
 
     @Transactional
     @GetMapping("/deleteBook")
-    public String deleteBook(@RequestParam Long id) {
-        //TODO alert You can not delete reserved book
+    public String deleteBook(@RequestParam Long id, RedirectAttributes redirAttrs) {
         boolean isDeleted = bookServiceImpl.deleteById(id);
+        if (isDeleted) {
+            redirAttrs.addFlashAttribute("success", "Book was deleted");
+        } else {
+            redirAttrs.addFlashAttribute("error", "Book is reserved, you can not delete it!");
+        }
         return "redirect:/books";
     }
 

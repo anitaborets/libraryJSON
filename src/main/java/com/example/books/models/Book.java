@@ -12,6 +12,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Reference;
 
 import java.sql.Date;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.temporal.Temporal;
 
 @Entity
 @Table
@@ -53,6 +58,20 @@ public class Book {
     private BookState bookState = BookState.FREE;
 
     @Transient
-    private Date returnDate;
+    private java.util.Date returnDate;
+
+    @Transient
+    private boolean overdue;
+
+
+    public long isOverdue() {
+        if (returnDate != null) {
+            LocalDate today = LocalDate.now();
+            java.util.Date utilDate = new java.util.Date(returnDate.getTime());
+            LocalDate temp = utilDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            Period difference = Period.between(temp,today);
+            return difference.getDays();
+        } else return 0;
+    }
 
 }

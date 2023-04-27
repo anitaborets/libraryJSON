@@ -1,10 +1,7 @@
 package com.example.books.book;
 
 import com.example.books.models.Book;
-import com.example.books.models.Person;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +14,6 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.example.books.book.BookState.FREE;
@@ -34,12 +30,11 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public List<Book> findAll(boolean sortByYear) {
         List books;
-
         try {
             if (sortByYear)
                 books = bookRepository.findAll();
             else
-                books = bookRepository.findAll(Sort.by("bookName"));
+                books = bookRepository.findAll(Sort.by("year"));
         } catch (Exception e) {
             books = Collections.EMPTY_LIST;
         }
@@ -50,11 +45,27 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public Page<Book> findAllWithPagination(Integer page, Integer size) {
         if (page >= 0 && size >= 0) {
-            Pageable pageable = PageRequest.of(page, size,Sort.by("bookName"));
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookName"));
             return bookRepository.findAll(pageable);
         } else {
-            return bookRepository.findAll(PageRequest.of(1, 3,Sort.by("bookName")));
+            return bookRepository.findAll(PageRequest.of(1, 3, Sort.by("bookName")));
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Book> find(String title) {
+        List<Book> result;
+        if (!title.isEmpty()) {
+            try {
+                result = bookRepository.findByBookNameStartingWithIgnoreCase(title);
+            } catch (Exception e) {
+                result = Collections.EMPTY_LIST;
+            }
+        } else {
+            result = Collections.EMPTY_LIST;
+        }
+        return result;
     }
 
     @Override
@@ -96,7 +107,6 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public void addBook(Book book) {
-
         bookRepository.findByISDN(book.getISDN()).orElseGet(() -> bookRepository.save(book));
         log.warn("book was added" + book.getBookName());
     }
@@ -134,7 +144,7 @@ public class BookServiceImpl implements BookService {
                 bookRepository.deleteById((long) id);
                 isDeleted = true;
             } catch (Exception e) {
-                log.error("Book" + id + "was not deleted" + e.getMessage());
+                log.error("Book" + id + "was not deleted, has owner " + bookForDelete.get().getOwner() + e.getMessage());
             }
         }
         return isDeleted;
@@ -145,5 +155,10 @@ public class BookServiceImpl implements BookService {
         Date returnDate = Date.valueOf(book.getBookingDate().toLocalDate().plusDays(BOOKING_PERIOD));
         book.setReturnDate(returnDate);
         return returnDate.toString();
+    }
+
+    @Override
+    public List<Book> overdue() {
+        return bookRepository.findOverdue();
     }
 }

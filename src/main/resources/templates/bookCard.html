@@ -65,10 +65,11 @@
                         <th>Owner</th>
                         <th>Date of booking</th>
                         <th>Date of return</th>
+                        <th>Overdue,days</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
+                    <tr th:style="${book.isOverdue}>1 ? 'color: red' : 'color: black'">
                         <td th:text="${book.getBookName}" scope="col"></td>
                         <td th:text="${book.getAuthor}"></td>
                         <td th:text="${book.getYear}"></td>
@@ -77,6 +78,7 @@
                         <td th:text="${owner}"></td>
                         <td th:text="${book.bookingDate}"></td>
                         <td th:text="${@bookServiceImpl.getDateOfReturn(book)}"></td>
+                        <td th:style="${book.isOverdue}>1 ? 'color: red' : 'color: black'" th:text="${book.isOverdue}"></td>
                     </tr>
                     </tbody>
                 </table>

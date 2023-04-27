@@ -12,33 +12,25 @@
 <div class="container overflow-hidden m-5">
     <div class="row gy-5">
         <div class="col">
-            <h2>Clients of our Library</h2>
+            <h2>DEBTORS</h2>
             <table class="table table-bordered table-sm table-striped">
                 <thead class="thead-dark">
                 <tr>
                     <th>Name</th>
                     <th>Surname</th>
-                    <th>Year of Born</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="person : ${users}">
+                <tr th:each="person : ${debtors}">
                     <td th:text="${person.getName}" scope="col"></td>
                     <td th:text="${person.getSurName}"></td>
-                    <td th:text="${person.getYearOfBorn}"></td>
                     <td><a th:href="@{/view(id=${person.id})}" class="btn btn-success">Person card</a>
-                    <td><a th:href="@{/update(id=${person.id})}" class="btn btn-info">Update</a>
-                    <td><a th:href="@{/delete(id=${person.id})}" class="btn btn-danger ml-2">Delete</a></td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<div class="alert alert-primary" role="alert" th:text="${success}" th:if="${success}"></div>
-<div class="alert alert-danger" role="alert" th:text="${error}" th:if="${error}"></div>
-
-<div th:insert="fragments/pagination_users.html"></div>
 
 <div th:replace="fragments/footer.html"></div>
 </body>

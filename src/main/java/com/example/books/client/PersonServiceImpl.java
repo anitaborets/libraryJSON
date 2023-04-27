@@ -36,10 +36,10 @@ public class PersonServiceImpl implements PersonService {
     @Transactional(readOnly = true)
     public Page<Person> findAllWithPagination(Integer page, Integer size) {
         if (page >= 0 && size >= 0) {
-            Pageable pageable = PageRequest.of(page, size,Sort.by("name"));
+            Pageable pageable = PageRequest.of(page, size, Sort.by("name"));
             return personRepository.findAll(pageable);
         } else {
-            return personRepository.findAll(PageRequest.of(1, 3,Sort.by("name")));
+            return personRepository.findAll(PageRequest.of(1, 3, Sort.by("name")));
         }
     }
 
@@ -61,7 +61,7 @@ public class PersonServiceImpl implements PersonService {
                     personRepository.deleteById((long) id);
                     isDeleted = true;
                 } catch (Exception e) {
-                  log.warn("person was not deleted. id: " + person.getId() + e.getMessage());
+                    log.warn("person was not deleted. id: " + person.getId() + " because has books " + e.getMessage());
                 }
             }
         }
