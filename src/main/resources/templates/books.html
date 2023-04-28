@@ -9,10 +9,17 @@
 <body>
 <div th:replace="fragments/navbar.html"></div>
 
+
 <div class="container overflow-hidden m-5">
     <div class="row gy-5">
         <div class="col">
             <h2>Our books</h2>
+            <form th:action="@{/search}" method="get">
+                <input type="text" name="query" th:value="${query}"  placeholder="Find book by name" size="80" >
+                <button type="submit" class="btn btn-info" >Search</button>
+                <button type="submit" class="btn btn-info" >Reset</button>
+            </form>
+
             <table class="table table-bordered table-sm table-striped">
                 <thead class="thead-dark">
                 <tr>
@@ -37,6 +44,12 @@
         </div>
     </div>
 </div>
+
+<div class="alert alert-primary" role="alert" th:text="${success}" th:if="${success}"></div>
+<div class="alert alert-danger" role="alert" th:text="${error}" th:if="${error}"></div>
+
+<div th:insert="fragments/pagination.html"></div>
+
 <div th:replace="fragments/footer.html"></div>
 </body>
 </html>

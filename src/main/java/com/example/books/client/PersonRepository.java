@@ -11,12 +11,15 @@ import java.util.Optional;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
-    //TODO return list if email exists
     @Transactional(readOnly = true)
     Optional<Person> findByEmail(String email);
 
     @Transactional(readOnly = true)
     @Override
     Optional<Person> findById(Long id);
-;
+
+    @Transactional(readOnly = true)
+    @Override
+    List<Person> findAll();
+
 }
