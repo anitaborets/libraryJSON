@@ -7,9 +7,9 @@ Logging - to file, @Slf4j
 
 ErrorPage.
 
-Validace - cez Spring Validator.
+Validace - Spring Validator.
 
-Actuator - monitoring cez endpoints, http://localhost:8080/actuator.
+Actuator - monitoring endpoints, http://localhost:8080/actuator.
 
 UnitTesty - controller, repository, service example.
 
