@@ -60,6 +60,7 @@ public class Book {
     @Transient
     private java.util.Date returnDate;
 
+
     public long isOverdue() {
         if (returnDate != null) {
             LocalDate today = LocalDate.now();
