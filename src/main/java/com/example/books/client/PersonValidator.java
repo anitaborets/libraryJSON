@@ -13,7 +13,7 @@ import java.util.Optional;
 //best practice - validator for every entity
 @Component
 public class PersonValidator implements Validator {
-    @Autowired
+    @Autowired(required = false)
     PersonRepository personRepository;
     @Override
     public boolean supports(Class<?> clazz) {

@@ -18,7 +18,7 @@ import java.util.Optional;
 @Slf4j
 public class PersonServiceImpl implements PersonService {
 
-    @Autowired
+    @Autowired(required = false)
     PersonRepository personRepository;
 
     @Override

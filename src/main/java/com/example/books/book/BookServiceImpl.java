@@ -23,7 +23,7 @@ import static com.example.books.book.BookState.RESERVED;
 @Service
 @Slf4j
 public class BookServiceImpl implements BookService {
-    @Autowired
+    @Autowired(required = false)
     BookRepository bookRepository;
 
     @Override

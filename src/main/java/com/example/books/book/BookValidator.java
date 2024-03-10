@@ -14,7 +14,7 @@ import java.util.Optional;
 @Component
 public class BookValidator implements Validator {
 
-    @Autowired
+    @Autowired(required = false)
     BookRepository bookRepository;
     @Override
     public boolean supports(Class<?> clazz) {

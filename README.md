@@ -1,5 +1,6 @@
 Library
-SpringBoot + PostgressSQL Prepojenie entit Client a Book - @ManyToOne and @OneToMany, kontrola prekročenia lehoty vratenia knihy, možnosť rezervovať a vratiť knihu.
+SpringBoot + PostgressSQL Prepojenie entit Client a Book - @ManyToOne and @OneToMany, 
+kontrola prekročenia lehoty vratenia knihy, možnosť rezervovať a vratiť knihu.
 
 Pagination and searching.
 
@@ -18,3 +19,7 @@ Java
 SpringBoot
 Thymeleaf
 PostgresSQL
+
+
+//todo
+1. 

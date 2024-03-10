@@ -1,5 +1,6 @@
 package com.example.books.book;
 
+import com.example.books.entities.BookEntity;
 import com.example.books.models.Book;
 import com.example.books.models.Person;
 import com.example.books.client.PersonRepository;
@@ -9,8 +10,6 @@ import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -22,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Collections;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,12 +35,19 @@ import static com.example.books.utils.Constants.BOOK_IS_FREE;
 @Slf4j
 @Scope(WebApplicationContext.SCOPE_SESSION)
 public class BookController {
-    @Autowired
+    @Autowired(required = false)
     BookRepository bookRepository;
-    @Autowired
-    BookServiceImpl bookServiceImpl;
-    @Autowired
+
+    //    @Autowired
+//    BookServiceImpl bookServiceImpl;
+    @Autowired(required = false)
     PersonRepository personRepository;
+
+
+    BookRepositoryJSON bookRepositoryJSON = new BookRepositoryJSON();
+
+    BookServiceJSONImpl bookServiceImpl = new BookServiceJSONImpl();
+
     @Autowired
     BookValidator bookValidator;
 
@@ -48,9 +56,15 @@ public class BookController {
     public String index(Model model, @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
                         @RequestParam(value = "page", required = false) @Min(0) Integer page,
                         @RequestParam(value = "size", required = false, defaultValue = "5") @Min(0) @Max(100) Integer size,
-                        @RequestParam(value = "sort", required = false) boolean sortByYear) {
+                        @RequestParam(value = "sort", required = false) boolean sortByYear) throws IOException {
 
-        int totalPages = (int) Math.ceil(1.0 * bookRepository.count() / size);
+        //int totalPages = (int) Math.ceil(1.0 * bookRepository.count() / size);
+
+        Set<BookEntity> library = bookServiceImpl.library();
+        System.out.println(library.stream().count());
+
+
+        int totalPages = (int) Math.ceil(1.0 * library.size() / size);
         if (totalPages > 1) {
             List<Integer> pagenumbers = IntStream.rangeClosed(1, totalPages).boxed().collect(Collectors.toList());
             model.addAttribute("page_numbers", pagenumbers);
@@ -59,7 +73,7 @@ public class BookController {
         model.addAttribute("current_page", page);
         if (page == null || size == null) {
             model.addAttribute("books", bookServiceImpl.findAllWithPagination(0, size));
-            //model.addAttribute("books", bookServiceImpl.findAll(sortByYear));
+            model.addAttribute("books",library);
         } else {
             model.addAttribute("books", bookServiceImpl.findAllWithPagination(page - 1, size));
         }
@@ -68,8 +82,9 @@ public class BookController {
 
     @GetMapping("/search")
     @Transactional(readOnly = true)
-    public String index(Model model, String query, RedirectAttributes redirAttrs) {
-        List<Book> result = bookServiceImpl.find(query);
+    public String index(Model model, String query, RedirectAttributes redirAttrs) throws IOException {
+        //List<Book> result = bookServiceImpl.find(query);
+        Set<BookEntity> result = bookServiceImpl.library();
         if (!result.isEmpty()) {
             model.addAttribute("result", result);
             return "search";
@@ -89,7 +104,7 @@ public class BookController {
 
     @PostMapping("/add")
     @Transactional
-    public String create(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult) {
+    public String create(@ModelAttribute("book") @Valid Book book, BindingResult bindingResult) throws IOException {
         bookValidator.validate(book, bindingResult);
         if (bindingResult.hasErrors()) {
             return "add";
